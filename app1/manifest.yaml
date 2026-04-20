@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1
+  labels:
+    project: roboshop
+    tier: frontend
+    component: app1
+  annotations:
+    kubernetes.io/change-cause: "moving to 1.29.7"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      project: roboshop
+      tier: frontend
+      component: app1
+  template:
+    metadata:
+      labels:
+        project: roboshop
+        tier: frontend
+        component: app1
+    spec:
+      containers:
+      - name: app1
+        image: varunkumarpinnam/app1:1.0.0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app1
+spec:
+  selector: 
+  # lables are used as selectors
+      project: roboshop
+      tier: frontend
+      component: app1
+  ports:
+  - protocol: TCP
+    port: 80 # servie port
+    targetPort: 80 # container port
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app1
+  alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+  alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:697076424099:certificate/4390ac91-1b9b-497a-a02b-ede557d95f5d
+  alb.ingress.kubernetes.io/scheme: internet-facing
+  alb.ingress.kubernetes.io/tags: Environment=dev,Project=roboshop
+  alb.ingress.kubernetes.io/target-type: ip
+spec:
+  ingressClassName: alb
+  rules:
+  - host: "app1.advidevops.online"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: app1
+            port:
+              number: 80
+
+
+
+
