@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app1
+  name: app2
   labels:
     project: roboshop
     tier: frontend
-    component: app1
+    component: app2
   annotations:
     kubernetes.io/change-cause: "moving to 1.29.7"
 spec:
@@ -14,28 +14,28 @@ spec:
     matchLabels:
       project: roboshop
       tier: frontend
-      component: app1
+      component: app2
   template:
     metadata:
       labels:
         project: roboshop
         tier: frontend
-        component: app1
+        component: app2
     spec:
       containers:
-      - name: app1
-        image: varunkumarpinnam/app1:1.0.0
+      - name: app2
+        image: varunkumarpinnam/app2:1.0.0
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: app1
+  name: app2
 spec:
   selector: 
   # lables are used as selectors
       project: roboshop
       tier: frontend
-      component: app1
+      component: app2
   ports:
   - protocol: TCP
     port: 80 # servie port
@@ -44,30 +44,27 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress-wildcard-host
+  name: app2
+  annotations:
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:697076424099:certificate/4390ac91-1b9b-497a-a02b-ede557d95f5d
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/tags: Environment=dev,Project=roboshop
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: roboshop
 spec:
+  ingressClassName: alb
   rules:
-  - host: "foo.bar.com"
+  - host: "app2.advidevops.online"
     http:
       paths:
       - pathType: Prefix
-        path: "/bar"
+        path: "/"
         backend:
           service:
-            name: service1
+            name: app2
             port:
               number: 80
-  - host: "*.foo.com"
-    http:
-      paths:
-      - pathType: Prefix
-        path: "/foo"
-        backend:
-          service:
-            name: service2
-            port:
-              number: 80
-
 
 
 
