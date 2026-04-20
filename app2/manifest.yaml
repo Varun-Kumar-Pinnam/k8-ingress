@@ -44,26 +44,30 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: app1
-  annotations:
-  alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
-  alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:697076424099:certificate/4390ac91-1b9b-497a-a02b-ede557d95f5d
-  alb.ingress.kubernetes.io/scheme: internet-facing
-  alb.ingress.kubernetes.io/tags: Environment=dev,Project=roboshop
-  alb.ingress.kubernetes.io/target-type: ip
+  name: ingress-wildcard-host
 spec:
-  ingressClassName: alb
   rules:
-  - host: "app1.advidevops.online"
+  - host: "foo.bar.com"
     http:
       paths:
       - pathType: Prefix
-        path: "/"
+        path: "/bar"
         backend:
           service:
-            name: app1
+            name: service1
             port:
               number: 80
+  - host: "*.foo.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/foo"
+        backend:
+          service:
+            name: service2
+            port:
+              number: 80
+
 
 
 
